@@ -42,14 +42,15 @@ namespace Z69_ClickOnceReplacer
         public delegate void SomethingLogicAfterSetup();
         public SomethingLogicAfterSetup somethingLogicAfterSetup;
 
-        
-        public void StartReplaceProcces(string appName, string squirrelSetupPath, bool addFilesPathToRegistry, bool createDataAppFolder)
+        public ClickOnceReplacer(string appName, string squirrelSetupPath, bool doAddFilesIntoRegistry, bool createDataAppFolder)
         {
             this.AppName = appName;
             this.SquirrelSetupPath = squirrelSetupPath;
-            this.DoAddFilesIntoRegistry = addFilesPathToRegistry;
+            this.DoAddFilesIntoRegistry = doAddFilesIntoRegistry;
             this.CreateDataAppFolder = createDataAppFolder;
-
+        }
+        public void StartReplaceProcces()
+        {
             //Производит замену технологии
                 // - AppName - имя приложения. Понадобиться если нужно будет создавать реестр
                     //для приложения, поэтому желательно соотносить с именем приложения в Squirrel версии приложения,
@@ -59,7 +60,7 @@ namespace Z69_ClickOnceReplacer
             Console.WriteLine("Начало процедуры замены ClickOnce на Squirrel.Windows...");
             if (this.CreateDataAppFolder)
             {
-                this.dataAppFolderName = this.currentUserAppDataLocalFolder + $"\\{appName}_Data";
+                this.dataAppFolderName = this.currentUserAppDataLocalFolder + $"\\{this.AppName}_Data";
                 Directory.CreateDirectory(this.dataAppFolderName);
             }
             if (this.FilesForMove.Count != 0)
@@ -67,21 +68,30 @@ namespace Z69_ClickOnceReplacer
                 this.MoveFiles(this.DoAddFilesIntoRegistry);
             }
 
-            if (this.FilesAddToReestr.Count != 0)
+            if (this.DoAddFilesIntoRegistry && this.FilesAddToReestr.Count != 0)
             {
-                this.createAppKeyInRegistry(appName);
+                this.CreateAppKeyInRegistry(this.AppName);
                 this.AddFilesPathToRegistry();
             }
 
+
+            //Сама установка Squirrel-варианта приложения
             if(this.somethingLogicBeforeSetup!= null)
                 this.somethingLogicBeforeSetup();
-            this.SetupSqurrelVariant(squirrelSetupPath);
+
+            this.SetupSqurrelVariant(this.SquirrelSetupPath);
+            
             if (this.somethingLogicAfterSetup != null)
                 this.somethingLogicAfterSetup();
             
             //Было круто бы тут добавить проверочку на существоание приложения в Апдате юзера...
 
+            //Удаление ярлыка appref-ms, и желательного самого того прилоежния. Но про приложение считаю достаточно опасно, а вот ярлык нормально
+
+            
+            
             Console.WriteLine("Замена ClickOnce на Squirrel.Windows завершено");
+
         }
 
         public void SetupSqurrelVariant(string squirrelSetupPath)
@@ -109,10 +119,6 @@ namespace Z69_ClickOnceReplacer
             Process.Start(squirrelSetupPath).WaitForExit();
         }
 
-        public void createAppKeyInRegistry(string appName)
-        {
-            //Создал ключи в реестре
-        }
         public void MoveFiles(bool AddFilesIntoReestr)
         {
             //Метод перетаскивания файлов в новый путь
@@ -123,7 +129,7 @@ namespace Z69_ClickOnceReplacer
                 File.Move(fileMove.Key, fileMove.Value);
             }
 
-            if (this.CreateDataAppFolder)
+            if (this.dataAppFolderName != null)
             {
                 if (this.FilesForMoveJust.Count != 0)
                 {
@@ -144,7 +150,14 @@ namespace Z69_ClickOnceReplacer
             }
         }
 
-        //Метод добавления пути файлов в реестр (Список этого объекта)
+        //МЕТОДЫ РАБОТЫ С РЕЕСТРОМ
+        public void CreateAppKeyInRegistry(string appName)
+        {
+            this.appRegistryKey = Registry.CurrentUser;
+            this.appRegistryKey = this.appRegistryKey.CreateSubKey("SOFTWARE");
+            this.appRegistryKey = this.appRegistryKey.CreateSubKey(this.AppName);
+        }
+        
         public void AddFilesPathToRegistry()
         {
             AddFilesPathToRegistry(this.FilesAddToReestr);
@@ -160,7 +173,7 @@ namespace Z69_ClickOnceReplacer
         }
         private void AddFileToRegistry(string FilePath)
         {
-            
+            this.appRegistryKey.SetValue(Path.GetFileName(FilePath), FilePath);
         }
     }
 }

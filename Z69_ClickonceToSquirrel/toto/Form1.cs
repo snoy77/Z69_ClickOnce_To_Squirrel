@@ -13,6 +13,7 @@ using Squirrel;
 using toto.Properties;
 
 using Z69_ClickOnceReplacer;
+using FastRegData;
 
 
 namespace toto
@@ -36,8 +37,9 @@ namespace toto
             //clickOnceReplacer.StartReplaceProcces("toto", @"С:\apps\toto_sq\Releases\Setup.exe", true, true);
             //this.Close();
 
-            
-
+            FastRegistry fastRegistry = new FastRegistry("toto");
+            fastRegistry.CreateAppKey();
+            MessageBox.Show(fastRegistry.GetValueOf("dbPath"));
         }
         private async Task CheckUpdate()
         {
