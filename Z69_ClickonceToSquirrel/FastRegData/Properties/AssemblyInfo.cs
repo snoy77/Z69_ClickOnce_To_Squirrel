@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // Общие сведения об этой сборке предоставляются следующим набором
 // набора атрибутов. Измените значения этих атрибутов для изменения сведений,
 // связанные со сборкой.
-[assembly: AssemblyTitle("Z69_ClickOnceReplacer")]
+[assembly: AssemblyTitle("FastRegData")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Z69_ClickOnceReplacer")]
+[assembly: AssemblyProduct("FastRegData")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Следующий GUID служит для идентификации библиотеки типов, если этот проект будет видимым для COM
-[assembly: Guid("840273ef-c8c8-45fa-b7a3-e16f3e1869a5")]
+[assembly: Guid("ce3e06da-ecfb-4f34-a2e0-dfbec021db66")]
 
 // Сведения о версии сборки состоят из указанных ниже четырех значений:
 //

@@ -13,11 +13,27 @@ namespace Z69_ClickOnceReplacer
 {
     public class ClickOnceReplacer
     {
+        public string currentUserAppDataLocalFolder
+        {
+            get
+            {
+                return Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData))
+                    .ToString() + @"\Local";
+            }
+        }
+
+        public string AppName;
+        public string SquirrelSetupPath;
+        public bool DoAddFilesIntoRegistry;
+        public bool CreateDataAppFolder;
+
+        private string dataAppFolderName;
         private RegistryKey registryKey = Registry.CurrentUser;
         private RegistryKey appRegistryKey;
 
-        public Dictionary<string, string> FilesForMove; // <string FilePath, string NewPath>
-        public List<string> FilesAddToReestr; // <string FilePath>
+        public Dictionary<string, string> FilesForMove = new Dictionary<string, string>(); // <string FilePath, string NewPath>
+        public List<string> FilesForMoveJust = new List<string>(); // <string FilePath>. Эти файлы будут просто перемещены в новую папку AppData\Local\[appName]_Data
+        public List<string> FilesAddToReestr = new List<string>(); // <string FilePath>
 
         //Делегат для подписи дополнительной логики до установки
         public delegate void SomethingLogicBeforeSetup();
@@ -27,8 +43,13 @@ namespace Z69_ClickOnceReplacer
         public SomethingLogicAfterSetup somethingLogicAfterSetup;
 
         
-        public void StartReplaceProcces(string AppName, string squirrelSetupPath, bool moveFiles, bool addMoveFilesIntoRegedit)
+        public void StartReplaceProcces(string appName, string squirrelSetupPath, bool addFilesPathToRegistry, bool createDataAppFolder)
         {
+            this.AppName = appName;
+            this.SquirrelSetupPath = squirrelSetupPath;
+            this.DoAddFilesIntoRegistry = addFilesPathToRegistry;
+            this.CreateDataAppFolder = createDataAppFolder;
+
             //Производит замену технологии
                 // - AppName - имя приложения. Понадобиться если нужно будет создавать реестр
                     //для приложения, поэтому желательно соотносить с именем приложения в Squirrel версии приложения,
@@ -36,21 +57,27 @@ namespace Z69_ClickOnceReplacer
 
 
             Console.WriteLine("Начало процедуры замены ClickOnce на Squirrel.Windows...");
-
+            if (this.CreateDataAppFolder)
+            {
+                this.dataAppFolderName = this.currentUserAppDataLocalFolder + $"\\{appName}_Data";
+                Directory.CreateDirectory(this.dataAppFolderName);
+            }
             if (this.FilesForMove.Count != 0)
             { 
-                this.MoveFiles(addMoveFilesIntoRegedit);
+                this.MoveFiles(this.DoAddFilesIntoRegistry);
             }
 
             if (this.FilesAddToReestr.Count != 0)
             {
-                this.appRegistryKey = registryKey.CreateSubKey(AppName);
-                this.AddFilesPathToRegedit();
+                this.createAppKeyInRegistry(appName);
+                this.AddFilesPathToRegistry();
             }
 
-            this.somethingLogicBeforeSetup();
+            if(this.somethingLogicBeforeSetup!= null)
+                this.somethingLogicBeforeSetup();
             this.SetupSqurrelVariant(squirrelSetupPath);
-            this.somethingLogicAfterSetup();
+            if (this.somethingLogicAfterSetup != null)
+                this.somethingLogicAfterSetup();
             
             //Было круто бы тут добавить проверочку на существоание приложения в Апдате юзера...
 
@@ -62,7 +89,7 @@ namespace Z69_ClickOnceReplacer
             Console.WriteLine("Установка Squirrel-варианта приложения...");
 
             //---------------------------------------------------------------------------
-            //Добавить логику проверки на конец пути, чтобы там было Releases\Setup.exe
+            //@Добавить логику проверки на конец пути, чтобы там было Releases\Setup.exe@
             //Но надо улучшить
 
             if (squirrelSetupPath.EndsWith(@"\Releases"))
@@ -81,11 +108,14 @@ namespace Z69_ClickOnceReplacer
 
             Process.Start(squirrelSetupPath).WaitForExit();
         }
-        
 
-        //Метод перетаскивания файлов в новый путь
+        public void createAppKeyInRegistry(string appName)
+        {
+            //Создал ключи в реестре
+        }
         public void MoveFiles(bool AddFilesIntoReestr)
         {
+            //Метод перетаскивания файлов в новый путь
             Console.WriteLine("Процедура перемещения отмеченных файлов...");
 
             foreach (var fileMove in FilesForMove)
@@ -93,33 +123,44 @@ namespace Z69_ClickOnceReplacer
                 File.Move(fileMove.Key, fileMove.Value);
             }
 
+            if (this.CreateDataAppFolder)
+            {
+                if (this.FilesForMoveJust.Count != 0)
+                {
+                    foreach (string file in this.FilesForMoveJust)
+                    {
+                        File.Move(file, this.dataAppFolderName + $"\\{Path.GetFileName(file)}");
+                    }
+                }
+            }
+
             if (AddFilesIntoReestr)
             {
+                //Здесь красивее сделать
                 foreach (string newFilePath in FilesForMove.Values)
                 {
-                    this.AddFileToRegedit(newFilePath);
+                   this.FilesAddToReestr.Add(newFilePath);
                 }
             }
         }
 
-
         //Метод добавления пути файлов в реестр (Список этого объекта)
-        public void AddFilesPathToRegedit()
+        public void AddFilesPathToRegistry()
         {
-            AddFilesPathToRegedit(this.FilesAddToReestr);
+            AddFilesPathToRegistry(this.FilesAddToReestr);
         }
-        public void AddFilesPathToRegedit(List<string> filesName)
+        public void AddFilesPathToRegistry(List<string> filesName)
         {
             Console.WriteLine("Процедура добавления файлов в реестр...");
 
             foreach (string file in filesName)
             {
-                this.AddFileToRegedit(file);
+                this.AddFileToRegistry(file);
             }
         }
-        private void AddFileToRegedit(string FilePath)
+        private void AddFileToRegistry(string FilePath)
         {
-            Console.WriteLine($"Типа добавил файл {FilePath} в реестр");
+            
         }
     }
 }
