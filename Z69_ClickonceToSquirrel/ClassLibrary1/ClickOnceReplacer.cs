@@ -28,7 +28,6 @@ namespace Z69_ClickOnceReplacer
         public bool CreateDataAppFolder;
 
         private string dataAppFolderName;
-        private RegistryKey registryKey = Registry.CurrentUser;
         private RegistryKey appRegistryKey;
 
         public Dictionary<string, string> FilesForMove = new Dictionary<string, string>(); // <string FilePath, string NewPath>
@@ -63,7 +62,7 @@ namespace Z69_ClickOnceReplacer
                 this.dataAppFolderName = this.currentUserAppDataLocalFolder + $"\\{this.AppName}_Data";
                 Directory.CreateDirectory(this.dataAppFolderName);
             }
-            if (this.FilesForMove.Count != 0)
+            if (this.FilesForMove.Count != 0 || this.FilesForMoveJust.Count != 0)
             { 
                 this.MoveFiles(this.DoAddFilesIntoRegistry);
             }
@@ -88,8 +87,6 @@ namespace Z69_ClickOnceReplacer
 
             //Удаление ярлыка appref-ms, и желательного самого того прилоежния. Но про приложение считаю достаточно опасно, а вот ярлык нормально
 
-            
-            
             Console.WriteLine("Замена ClickOnce на Squirrel.Windows завершено");
 
         }
@@ -145,7 +142,12 @@ namespace Z69_ClickOnceReplacer
                 //Здесь красивее сделать
                 foreach (string newFilePath in FilesForMove.Values)
                 {
-                   this.FilesAddToReestr.Add(newFilePath);
+                    this.FilesAddToReestr.Add(newFilePath);
+                }
+
+                foreach (string file in this.FilesForMoveJust)
+                {
+                    this.FilesAddToReestr.Add(this.dataAppFolderName + $"\\{Path.GetFileName(file)}");
                 }
             }
         }
