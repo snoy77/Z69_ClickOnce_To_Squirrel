@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace toto.Properties {
+namespace ConsoleApp1.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,27 +25,25 @@ namespace toto.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("TextFile1.txt")]
-        public string textFilePath {
+        [global::System.Configuration.DefaultSettingValueAttribute("c1v")]
+        public string c1 {
             get {
-                return ((string)(this["textFilePath"]));
+                return ((string)(this["c1"]));
             }
             set {
-                this["textFilePath"] = value;
+                this["c1"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ArrayOfString xmlns:xsi=\"http://www.w3." +
-            "org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <s" +
-            "tring>TextFile1</string>\r\n  <string>bbb.mdb</string>\r\n</ArrayOfString>")]
-        public global::System.Collections.Specialized.StringCollection ads {
+        [global::System.Configuration.DefaultSettingValueAttribute("c2v")]
+        public string c2 {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["ads"]));
+                return ((string)(this["c2"]));
             }
             set {
-                this["ads"] = value;
+                this["c2"] = value;
             }
         }
     }

@@ -43,7 +43,7 @@ namespace toto
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(699, 23);
+            this.button1.Location = new System.Drawing.Point(695, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(187, 83);
             this.button1.TabIndex = 1;
@@ -55,7 +55,7 @@ namespace toto
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1285, 544);
+            this.ClientSize = new System.Drawing.Size(948, 475);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.listBox1);
             this.Name = "Form1";
