@@ -27,15 +27,15 @@ namespace Z70_SquirrelHelper
 
             this.registryKey = Registry.CurrentUser.CreateSubKey("SOFTWARE").CreateSubKey(appName);
         }
-        public void CompareAndDefineParameters(string keys)
+        public void CompareAndDefineParameters(string[] keys)
         {
             string result = "";
-            foreach (SettingsProperty property in Settings.Default.Properties)
+            foreach (string key in keys)
             {
-                result = this.GetValueFromRegistry(property.Name);
-                if (property.DefaultValue != result)
-                    if(result != null) 
-                        property.DefaultValue = result;
+                result = this.GetValueFromRegistry(key);
+                if (Settings.Default.Properties[key].DefaultValue != result)
+                    if(result != null)
+                        Settings.Default.Properties[key].DefaultValue = result;
                     else
                     {
                         //Здесь надо чтобы sqlhelper создал ключ-значение в реесте со значением... а каким.
@@ -44,7 +44,6 @@ namespace Z70_SquirrelHelper
                         //У МЕНЯ ЖЕ ЕСТЬ БЛИН В АПДАТЕ ИХ ПАПКА ААААААААААААААААААААААААААААА 
                         //Под устал((((
                     }
-
             }
         }
 

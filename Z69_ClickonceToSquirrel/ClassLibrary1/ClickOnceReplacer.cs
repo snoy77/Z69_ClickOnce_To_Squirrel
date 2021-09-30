@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.Win32;
+using System.Windows.Forms;
 
 namespace Z69_ClickOnceReplacer
 {
@@ -59,8 +60,10 @@ namespace Z69_ClickOnceReplacer
             Console.WriteLine("Начало процедуры замены ClickOnce на Squirrel.Windows...");
             if (this.CreateDataAppFolder)
             {
+               Console.WriteLine($"StartReplaceProcces: Создание папки приложения...");
                 this.dataAppFolderName = this.currentUserAppDataLocalFolder + $"\\{this.AppName}_Data";
                 Directory.CreateDirectory(this.dataAppFolderName);
+                Console.WriteLine($"StartReplaceProcces: directoryName: {dataAppFolderName}, DirectoryEx: {Directory.Exists(dataAppFolderName)}");
             }
             if (this.FilesForMove.Count != 0 || this.FilesForMoveJust.Count != 0)
             { 
@@ -99,20 +102,23 @@ namespace Z69_ClickOnceReplacer
             //@Добавить логику проверки на конец пути, чтобы там было Releases\Setup.exe@
             //Но надо улучшить
 
-            if (squirrelSetupPath.EndsWith(@"\Releases"))
-            {
-                squirrelSetupPath += @"\Setup.exe";
-            }
-            else if (squirrelSetupPath.EndsWith(@"\Releases\"))
-            {
-                squirrelSetupPath += @"Setup.exe";
-            }
-            else if (!squirrelSetupPath.EndsWith(@"\Releases"))
-            {
-                squirrelSetupPath += @"\Releases\Setup.exe";
-            }
+            //Система от дураков всё портит
+
+            //if (squirrelSetupPath.EndsWith(@"\Releases"))
+            //{
+            //    squirrelSetupPath += @"\Setup.exe";
+            //}
+            //else if (squirrelSetupPath.EndsWith(@"\Releases\"))
+            //{
+            //    squirrelSetupPath += @"Setup.exe";
+            //}
+            //else if (!squirrelSetupPath.EndsWith(@"\Releases"))
+            //{
+            //    squirrelSetupPath += @"\Releases\Setup.exe";
+            //}
             //---------------------------------------------------------------------------
 
+            Console.WriteLine($"Вот тут стартует: {squirrelSetupPath}");
             Process.Start(squirrelSetupPath).WaitForExit();
         }
 
@@ -120,10 +126,11 @@ namespace Z69_ClickOnceReplacer
         {
             //Метод перетаскивания файлов в новый путь
             Console.WriteLine("Процедура перемещения отмеченных файлов...");
-
+            Console.WriteLine($"FilesForMove:");
             foreach (var fileMove in FilesForMove)
             {
-                File.Move(fileMove.Key, fileMove.Value);
+                Console.WriteLine($"File: {fileMove.Key} | {fileMove.Value}");
+                File.Copy(fileMove.Key, fileMove.Value);
             }
 
             if (this.dataAppFolderName != null)
@@ -132,7 +139,8 @@ namespace Z69_ClickOnceReplacer
                 {
                     foreach (string file in this.FilesForMoveJust)
                     {
-                        File.Move(file, this.dataAppFolderName + $"\\{Path.GetFileName(file)}");
+                        Console.WriteLine($"File: {file} | {this.dataAppFolderName}\\{Path.GetFileName(file)}");
+                        File.Copy(file, this.dataAppFolderName + $"\\{Path.GetFileName(file)}");
                     }
                 }
             }
