@@ -1,0 +1,75 @@
+ public ClickOnceReplacer clickOnceReplacer;
+        public string squirrelUpdatePath;
+        public bool sqWork = true;
+
+MainFormLoaded{
+...
+
+            if (sqWork)
+            {
+                checkUpdate();
+            }
+
+}
+
+private async Task checkUpdate()
+        {
+            using (UpdateManager updateManager = new UpdateManager(squirrelUpdatePath))
+            {
+                await updateManager.CheckForUpdate();
+            }
+        }
+
+private void InitConnection()
+        {
+            //Получаю путь к БД
+            string dbPath;
+            if (!sqWork)
+            {
+                if (string.IsNullOrEmpty(Properties.Settings.Default.DBFile))
+                    return;
+                 dbPath = ApplicationDeployment.IsNetworkDeployed
+                    ? ApplicationDeployment.CurrentDeployment.DataDirectory
+                    : System.Windows.Forms.Application.StartupPath;
+            }
+            else
+            {
+                dbPath = appRegistry.getValue("PassRequests.mdb");
+
+                if (!File.Exists(dbPath))
+                {
+                    MessageBox.Show($"А файлика-то нет!\n{dbPath}");
+                }
+
+            }
+            
+            //Это настройка строки для пути к БД вместе с файлом...
+            //Вообще для Sq версии считаю код бесполезным, так как всё из реестра берётся, и можно просто приравнять параметры.
+            //Да и вообще параметры считаю уже бесполезными
+            if (!sqWork)
+            {
+                if (Properties.Settings.Default.DBFile.StartsWith(@".\"))
+                {
+                    Properties.Settings.Default.DBFile = Properties.Settings.Default.DBFile.
+                        Replace(@".\", dbPath + @"\");
+                }
+
+                if (!File.Exists(Properties.Settings.Default.DBFile))
+                {
+                    Properties.Settings.Default.DBFile =
+                        dbPath + Path.DirectorySeparatorChar + Path.GetFileName(Properties.Settings.Default.DBFile);
+                }
+            }
+            else
+            {
+                Properties.Settings.Default.DBFile = dbPath;
+            }
+     
+            
+            var conStr =
+                new System.Data.OleDb.OleDbConnectionStringBuilder(
+                    Properties.Settings.Default.PassRequestsConnectionString)
+                    {DataSource = Properties.Settings.Default.DBFile};
+            Properties.Settings.Default["PassRequestsConnectionString"] = conStr.ConnectionString;
+            Properties.Settings.Default.Save();
+        }
