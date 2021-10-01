@@ -57,13 +57,13 @@ namespace Z69_ClickOnceReplacer
                     //чтобы они к одному ключу обращались
 
 
-            Console.WriteLine("Начало процедуры замены ClickOnce на Squirrel.Windows...");
+            Console.WriteLine("--------------------Начало процедуры замены ClickOnce на Squirrel.Windows--------------------");
             if (this.CreateDataAppFolder)
             {
-               Console.WriteLine($"StartReplaceProcces: Создание папки приложения...");
+               Console.WriteLine($"- StartReplaceProcces: Создание папки приложения...");
                 this.dataAppFolderName = this.currentUserAppDataLocalFolder + $"\\{this.AppName}_Data";
                 Directory.CreateDirectory(this.dataAppFolderName);
-                Console.WriteLine($"StartReplaceProcces: directoryName: {dataAppFolderName}, DirectoryEx: {Directory.Exists(dataAppFolderName)}");
+                Console.WriteLine($"- StartReplaceProcces: directoryName: {dataAppFolderName}, DirectoryEx: {Directory.Exists(dataAppFolderName)}");
             }
             if (this.FilesForMove.Count != 0 || this.FilesForMoveJust.Count != 0)
             { 
@@ -90,7 +90,7 @@ namespace Z69_ClickOnceReplacer
 
             //Удаление ярлыка appref-ms, и желательного самого того прилоежния. Но про приложение считаю достаточно опасно, а вот ярлык нормально
 
-            Console.WriteLine("Замена ClickOnce на Squirrel.Windows завершено");
+            Console.WriteLine("--------------------Замена ClickOnce на Squirrel.Windows завершено--------------------");
 
         }
 
@@ -126,24 +126,37 @@ namespace Z69_ClickOnceReplacer
         {
             //Метод перетаскивания файлов в новый путь
             Console.WriteLine("Процедура перемещения отмеченных файлов...");
-            Console.WriteLine($"FilesForMove:");
-            foreach (var fileMove in FilesForMove)
-            {
-                Console.WriteLine($"File: {fileMove.Key} | {fileMove.Value}");
-                File.Copy(fileMove.Key, fileMove.Value);
-            }
 
-            if (this.dataAppFolderName != null)
+
+            foreach (var file in FilesForMove)
             {
-                if (this.FilesForMoveJust.Count != 0)
+                Console.WriteLine($"-- File: {file.Key} to {file.Value}...");
+                if (!File.Exists(file.Value))
                 {
-                    foreach (string file in this.FilesForMoveJust)
-                    {
-                        Console.WriteLine($"File: {file} | {this.dataAppFolderName}\\{Path.GetFileName(file)}");
-                        File.Copy(file, this.dataAppFolderName + $"\\{Path.GetFileName(file)}");
-                    }
+                   
+                    File.Copy(file.Key, file.Value);
+                }
+                else
+                {
+                    Console.WriteLine("Файл в конечном пути уже существует!");
                 }
             }
+
+            if (this.FilesForMoveJust.Count != 0 && this.dataAppFolderName != null)
+            {
+                string newPath;
+                foreach (string file in this.FilesForMoveJust)
+                {
+                    newPath = this.dataAppFolderName + $"\\{Path.GetFileName(file)}";
+                    Console.WriteLine($"-- File: {file} to {newPath}...");
+
+                    if (!File.Exists(newPath))
+                        File.Copy(file, newPath);
+                    else
+                        Console.WriteLine("Файл в конечном пути уже существует!");
+                }
+            }
+
 
             if (AddFilesIntoReestr)
             {
@@ -183,6 +196,7 @@ namespace Z69_ClickOnceReplacer
         }
         private void AddFileToRegistry(string FilePath)
         {
+            Console.WriteLine($"Добавление в реестр: Ключ:{Path.GetFileName(FilePath)}, Значение: {FilePath}");
             this.appRegistryKey.SetValue(Path.GetFileName(FilePath), FilePath);
         }
     }
