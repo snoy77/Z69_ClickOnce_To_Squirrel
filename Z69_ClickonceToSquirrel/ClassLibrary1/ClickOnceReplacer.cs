@@ -28,12 +28,13 @@ namespace Z69_ClickOnceReplacer
         public bool DoAddFilesIntoRegistry;
         public bool CreateDataAppFolder;
 
-        private string dataAppFolderName;
-        private RegistryKey appRegistryKey;
+        public string dataAppFolderName;
+        public RegistryKey appRegistryKey;
 
         public Dictionary<string, string> FilesForMove = new Dictionary<string, string>(); // <string FilePath, string NewPath>
         public List<string> FilesForMoveJust = new List<string>(); // <string FilePath>. Эти файлы будут просто перемещены в новую папку AppData\Local\[appName]_Data
         public List<string> FilesAddToReestr = new List<string>(); // <string FilePath>
+        public Dictionary<string, string> NewRegistryRecord = new Dictionary<string, string>(); // <string key, string value>
 
         //Делегат для подписи дополнительной логики до установки
         public delegate void SomethingLogicBeforeSetup();
@@ -75,7 +76,7 @@ namespace Z69_ClickOnceReplacer
                 this.CreateAppKeyInRegistry(this.AppName);
                 this.AddFilesPathToRegistry();
             }
-
+            this.AddValuesToRegistry(this.NewRegistryRecord);
 
             //Сама установка Squirrel-варианта приложения
             if(this.somethingLogicBeforeSetup!= null)
@@ -198,6 +199,14 @@ namespace Z69_ClickOnceReplacer
         {
             Console.WriteLine($"Добавление в реестр: Ключ:{Path.GetFileName(FilePath)}, Значение: {FilePath}");
             this.appRegistryKey.SetValue(Path.GetFileName(FilePath), FilePath);
+        }
+
+        private void AddValuesToRegistry(Dictionary<string, string> records)
+        {
+            foreach (var record in this.NewRegistryRecord)
+            {
+                this.appRegistryKey.SetValue(record.Key, record.Value);
+            }
         }
     }
 }
